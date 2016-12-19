@@ -25,6 +25,9 @@ public class CreateGame : MonoBehaviour {
 	[SerializeField] GameObject[] tile;
 	List<GameObject> tile_Bank = new List<GameObject>();
 
+	HashSet<GameObject> tileSelect = new HashSet<GameObject> ();
+
+
 	Tiles[,] tiles;
 
 	void ShuffleList()
@@ -71,8 +74,6 @@ public class CreateGame : MonoBehaviour {
 					}
 				
 				}
-
-				
 			}
 			
 		}
@@ -82,6 +83,31 @@ public class CreateGame : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		if (Input.GetMouseButton (0)) {
+			Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+			RaycastHit2D hit = Physics2D.GetRayIntersection (ray, 1000);
+
+			if (hit) {
+				tileSelect.Add(hit.collider.gameObject);
+
+			}
+
+		
+		} else if (Input.GetMouseButtonUp (0) && tileSelect.Count>0) {
+			FlipTile (tileSelect); // men-flip tile yang telah dipilih
+			tileSelect.Clear ();
+		
+		}
+			
 	
 	}
+
+	void FlipTile(HashSet<GameObject> hash)
+	{
+		foreach (GameObject i in hash) {
+			//ubah tile ke lain
+			Destroy (i); // cuma untuk test
+		}
+	}
+
 }
