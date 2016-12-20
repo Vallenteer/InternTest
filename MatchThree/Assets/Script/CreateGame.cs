@@ -8,16 +8,14 @@ public class Tiles
 	public string type;
 	public Tiles(GameObject tile, string t)
 	{
-		tile = tile_Obj;
-		t = type;
+		tile_Obj=tile;
+		type=t;
 	}
 
 }
 
 public class CreateGame : MonoBehaviour {
 
-	GameObject tile1=null;
-	GameObject tile2=null;
 
 	[SerializeField] int rows;
 	[SerializeField] int cols;
@@ -27,6 +25,7 @@ public class CreateGame : MonoBehaviour {
 
 	HashSet<GameObject> tileSelect = new HashSet<GameObject> ();
 
+	bool renewBoard=false;
 
 	Tiles[,] tiles;
 
@@ -83,6 +82,7 @@ public class CreateGame : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		CheckGrid ();
 		if (Input.GetMouseButton (0)) {
 			Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
 			RaycastHit2D hit = Physics2D.GetRayIntersection (ray, 1000);
@@ -106,8 +106,123 @@ public class CreateGame : MonoBehaviour {
 	{
 		foreach (GameObject i in hash) {
 			//ubah tile ke lain
-			Destroy (i); // cuma untuk test
+			tiles[(int)i.transform.position.x,(int)i.transform.position.y].tile_Obj.SetActive(false); // cuma untuk test
+			tiles[(int)i.transform.position.x,(int)i.transform.position.y]=null;
+		}
+		renewBoard = true; //untuk test
+	}
+
+	void CheckGrid()
+	{
+		int counter = 1;
+		//check kolom
+		for (int row = 0; row < rows; row++) {
+			counter = 1;
+			for (int col = 1; col < cols; col++) {
+				if (tiles [col, row] != null && tiles [col - 1, row] != null) {
+					//jika tiles aktif
+					if (tiles [col, row].type == tiles [col - 1, row].type) {
+						counter++;
+					} else {
+						//jika ada 3 atau lebih apus 
+
+						if (counter >= 3) {
+							//Debug.Log (counter+" " +col+" "+row);
+							AddPointsCol (counter,col-1,row);
+							renewBoard = true;
+						}	
+						counter = 1; //reset counter
+					}
+				}
+			}
+		}
+		// check Baris
+		for (int col = 0; col < cols; col++) {
+			counter = 1;
+			for (int row = 1; row < rows; row++) {
+
+				if (tiles [col, row] != null && tiles [col , row-1] != null) {
+					//jika tiles aktif
+					if (tiles [col, row].type == tiles [col , row-1].type) {
+						counter++;
+					} else {
+						//jika ada 3 atau lebih apus 
+						if (counter >= 3) {
+							//Debug.Log("row "+counter);
+							AddPointsRow (counter,col,row-1);
+							renewBoard = true;
+						}
+						counter = 1; //reset counter
+					}
+
+				}
+
+			}
+
+		}
+		if (renewBoard) {
+			RenewGrid ();
+			renewBoard=false;
+		}
+
+	}
+
+	void AddPointsCol(int counter,int col,int row)
+	{
+		//Debug.Log ("jajaj");
+		for (int i = 0; i < counter; i++) {
+			if (tiles [col-i, row] != null) {
+				tiles [col-i, row].tile_Obj.SetActive (false);
+			}
+			tiles [col - i, row] = null;
+		}
+
+
+	}
+	void AddPointsRow(int counter,int col,int row)
+	{
+		for (int i = 0; i < counter; i++) {
+			if (tiles [col, row-i] != null) {
+				tiles [col, row-i].tile_Obj.SetActive (false);
+			}
+			tiles [col, row-i] = null;
 		}
 	}
 
+	void RenewGrid()
+	{
+		bool anyMoved = false;
+		ShuffleList ();
+		for (int row = 1; row < rows; row++) {
+			for (int col = 0; col < cols; col++) {
+				//jika di paling atas dan gk ada tile
+				if (row == rows - 1 && tiles [col, row] == null) {
+					Vector3 tile_Pos = new Vector3 (col, row, 0);
+					for (int n = 0; n < tile_Bank.Count; n++) {
+						GameObject o = tile_Bank [n];
+						if (!o.activeSelf) {
+							o.transform.position = new Vector3 (tile_Pos.x, tile_Pos.y, tile_Pos.z);
+							o.SetActive (true);
+							tiles [col, row] = new Tiles (o, o.name);
+							n = tile_Bank.Count + 1;
+						}
+					}
+				}
+				if (tiles [col, row] != null) {
+					//kalau dibawahnya kosong maka turun
+					if (tiles [col, row - 1] == null) {
+						tiles [col, row - 1] = tiles [col, row];
+						tiles [col, row].tile_Obj.transform.position = new Vector3 (col, row - 1, 0);
+						tiles [col, row] = null;
+						anyMoved = true;
+					}
+				}
+			}
+		}
+		if (anyMoved) {
+			Invoke ("RenewGrid", 0.5f);// kasi delay biar cakep
+
+		}
+
+	}
 }
