@@ -123,7 +123,7 @@ public class CreateGame : MonoBehaviour {
 						tileSelect.Add (hit.collider.gameObject);
 					}
 				}
-				Debug.Log (tileSelect.Count.ToString ());
+				//Debug.Log (tileSelect.Count.ToString ());
 		
 			} else if (Input.GetMouseButtonUp (0) &&TilePowerUp!=null ) {
 				MineActive (TilePowerUp);
@@ -229,16 +229,15 @@ public class CreateGame : MonoBehaviour {
 					if (tiles [col, row].type == tiles [col - 1, row].type) {
 						counter++;
 					} else {
-						//jika ada 3 atau lebih apus 
-						//Debug.Log("("+col + ", "+row+")"+counter);
-						if (counter >= 3) {
-							//Debug.Log (counter+" " +col+" "+row);
-							AddPointsCol (counter,col-1,row);
-							renewBoard = true;
-							match = true;
-						}	
+
 						counter = 1; //reset counter
 					}
+					if (counter >= 3) {
+						//Debug.Log (counter+" " +col+" "+row);
+						AddPointsCol (counter,col,row);
+						renewBoard = true;
+						match = true;
+					}	
 				}
 			}
 		}
@@ -252,14 +251,14 @@ public class CreateGame : MonoBehaviour {
 					if (tiles [col, row].type == tiles [col , row-1].type) {
 						counter++;
 					} else {
-						//jika ada 3 atau lebih apus 
-						if (counter >= 3) {
-							//Debug.Log("row "+counter);
-							AddPointsRow (counter,col,row-1);
-							renewBoard = true;
-							match = true;
-						}
+						
 						counter = 1; //reset counter
+					}//jika ada 3 atau lebih apus 
+					if (counter >= 3) {
+						//Debug.Log("row "+counter);
+						AddPointsRow (counter,col,row);
+						renewBoard = true;
+						match = true;
 					}
 
 				}
