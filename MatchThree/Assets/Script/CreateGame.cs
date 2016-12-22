@@ -29,9 +29,11 @@ public class CreateGame : MonoBehaviour {
 	List<GameObject> tile_Bank = new List<GameObject>();
 
 	HashSet<GameObject> tileSelect = new HashSet<GameObject> ();
+	HashSet<GameObject> temporaryTile= new HashSet<GameObject>();
 
 	bool renewBoard=false;
 	bool anyMoved = false;
+	bool AnyMatch=false;
 	Tiles[,] tiles;
 
 	void ShuffleList()
@@ -103,7 +105,7 @@ public class CreateGame : MonoBehaviour {
 		
 		CheckGrid ();
 		//selama ada yang gerak dia gk mau jalan
-		if (!anyMoved && GameManager.MoveLeft>0) {
+		if (!anyMoved && GameManager.MoveLeft>0 && temporaryTile.Count<=0 ) {
 			
 			if (Input.GetMouseButton (0)) {
 				Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
@@ -116,9 +118,17 @@ public class CreateGame : MonoBehaviour {
 
 		
 			} else if (Input.GetMouseButtonUp (0) && tileSelect.Count > 0) {
-				GameManager.Move();
-				FlipTile (tileSelect); // men-flip tile yang telah dipilih
+
+				FlipTile (tileSelect);
 				tileSelect.Clear ();
+				AnyMatch = CheckGrid ();
+				if(!AnyMatch){
+					Invoke("SelectTiles",1f);// men-flip tile yang telah dipilih
+				}else {
+					GameManager.Move();
+					temporaryTile.Clear ();
+				}
+
 		
 			}
 
@@ -126,16 +136,22 @@ public class CreateGame : MonoBehaviour {
 
 	
 	}
+	void SelectTiles()
+	{
+		FlipBackTile (temporaryTile);
+		temporaryTile.Clear ();
+
+	}
 
 	void FlipTile(HashSet<GameObject> hash)
 	{
 		foreach (GameObject i in hash) {
-			
 			int col = (int)i.transform.position.x;
 			int row= (int)i.transform.position.y;
 			Vector3 tile_Pos = new Vector3 (col, row, 0);
 			GameObject o=null;
 			//ubah tile ke lain
+			//Debug.Log(col+" +" +row);
 			if (tiles [col,row].tile_Obj.tag == "Blutile") {
 				//merubah dari Blue ke purple
 				if (!tile_Bank.Exists (x => (x.gameObject.tag == "Purtile") && (x.activeSelf == false))) {
@@ -178,14 +194,15 @@ public class CreateGame : MonoBehaviour {
 			tiles [col, row].tile_Obj.SetActive (false);
 			tiles [col, row].tile_Obj.transform.position = new Vector3 (-10, -10, 0);
 			tiles [col,row] = new Tiles(o,o.gameObject.tag); // dari blutile jadi purtile
+			temporaryTile.Add(o);
 			o.SetActive(true);	
 		}
 	}
 
-	void CheckGrid()
+	bool CheckGrid()
 	{
 		int counter = 1;
-
+		bool match = false;
 		//check kolom
 		for (int row = 0; row < rows; row++) {
 			counter = 1;
@@ -201,6 +218,7 @@ public class CreateGame : MonoBehaviour {
 							//Debug.Log (counter+" " +col+" "+row);
 							AddPointsCol (counter,col-1,row);
 							renewBoard = true;
+							match = true;
 						}	
 						counter = 1; //reset counter
 					}
@@ -222,6 +240,7 @@ public class CreateGame : MonoBehaviour {
 							//Debug.Log("row "+counter);
 							AddPointsRow (counter,col,row-1);
 							renewBoard = true;
+							match = true;
 						}
 						counter = 1; //reset counter
 					}
@@ -235,6 +254,7 @@ public class CreateGame : MonoBehaviour {
 			RenewGrid ();
 			renewBoard=false;
 		}
+		return match;
 
 	}
 
@@ -424,5 +444,59 @@ public class CreateGame : MonoBehaviour {
 		//FutureTile.tile_Obj.SetActive (false);
 		FutureTile= new Tiles(o,o.gameObject.tag); 
 		//o.SetActive(true);
+	}
+	void FlipBackTile(HashSet<GameObject> hash)
+	{
+		foreach (GameObject i in hash) {
+			int col = (int)i.transform.position.x;
+			int row= (int)i.transform.position.y;
+			Vector3 tile_Pos = new Vector3 (col, row, 0);
+			GameObject o=null;
+			//ubah tile ke lain
+			//Debug.Log(col+" +" +row);
+			if (tiles [col,row].tile_Obj.tag == "Blutile") {
+				//merubah dari Blue ke purple
+				if (!tile_Bank.Exists (x => (x.gameObject.tag == "Purtile") && (x.activeSelf == false))) {
+					o = (GameObject)Instantiate (tile [1], new Vector3 (-10, -10, 0), tile [1].transform.rotation);
+					o.SetActive(false);
+					tile_Bank.Add (o); 
+				} else {
+					o = tile_Bank.Find (x => (x.gameObject.tag == "Purtile") &&  (x.activeSelf==false));
+				}
+			} else if (tiles [col,row].tile_Obj.tag == "Purtile") {
+				//merubah dari purple to blue
+				if (!tile_Bank.Exists (x => (x.gameObject.tag == "Blutile") && (x.activeSelf == false))) {
+					o = (GameObject)Instantiate (tile [0], new Vector3 (-10, -10, 0), tile [0].transform.rotation);
+					o.SetActive(false);
+					tile_Bank.Add (o); 
+				} else {
+					o = tile_Bank.Find (x => (x.gameObject.tag == "Blutile") &&  (x.activeSelf==false));
+				}
+			}else if (tiles [col,row].tile_Obj.tag == "Siltile") {
+				//merubah dari sil to ye
+				if (!tile_Bank.Exists (x => (x.gameObject.tag == "Yetile") && (x.activeSelf == false))) {
+					o = (GameObject)Instantiate (tile [3], new Vector3 (-10, -10, 0), tile [3].transform.rotation);
+					o.SetActive(false);
+					tile_Bank.Add (o); 
+				} else {
+					o = tile_Bank.Find (x => (x.gameObject.tag == "Yetile") &&  (x.activeSelf==false));
+				}
+			}else if (tiles[col,row].tile_Obj.tag == "Yetile") {
+				//merubah dari ye ke sil
+				if (!tile_Bank.Exists (x => (x.gameObject.tag == "Siltile") && (x.activeSelf == false))) {
+					o = (GameObject)Instantiate (tile [2], new Vector3 (-10, -10, 0), tile [2].transform.rotation);
+					o.SetActive(false);
+					tile_Bank.Add (o); 
+				} else {
+					o = tile_Bank.Find (x => (x.gameObject.tag == "Siltile") &&  (x.activeSelf==false));
+				}
+			}  
+
+			o.transform.position = new Vector3 (tile_Pos.x, tile_Pos.y, tile_Pos.z);
+			tiles [col, row].tile_Obj.SetActive (false);
+			tiles [col, row].tile_Obj.transform.position = new Vector3 (-10, -10, 0);
+			tiles [col,row] = new Tiles(o,o.gameObject.tag); // dari blutile jadi purtile
+			o.SetActive(true);	
+		}
 	}
 }
