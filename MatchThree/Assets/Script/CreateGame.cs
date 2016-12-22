@@ -31,6 +31,9 @@ public class CreateGame : MonoBehaviour {
 	HashSet<GameObject> tileSelect = new HashSet<GameObject> ();
 	HashSet<GameObject> temporaryTile= new HashSet<GameObject>();
 
+	//power Up
+	GameObject TilePowerUp;
+
 	bool renewBoard=false;
 	bool anyMoved = false;
 	bool AnyMatch=false;
@@ -113,13 +116,22 @@ public class CreateGame : MonoBehaviour {
 				RaycastHit2D hit = Physics2D.GetRayIntersection (ray, 1000);
 
 				if (hit) {
-					tileSelect.Add (hit.collider.gameObject);
-
+					if (GameManager.MinePowerUp) {
+						TilePowerUp = hit.collider.gameObject;
+						Debug.Log (TilePowerUp.transform.position.x + " " + TilePowerUp.transform.position.y); 
+					} else {
+						tileSelect.Add (hit.collider.gameObject);
+					}
 				}
-
+				Debug.Log (tileSelect.Count.ToString ());
 		
-			} else if (Input.GetMouseButtonUp (0) && tileSelect.Count > 0) {
-
+			} else if (Input.GetMouseButtonUp (0) &&TilePowerUp!=null ) {
+				MineActive (TilePowerUp);
+				TilePowerUp = null;
+				GameManager.Move();
+			
+			}else if (Input.GetMouseButtonUp (0) && tileSelect.Count > 0 ) {
+				
 				FlipTile (tileSelect);
 				tileSelect.Clear ();
 				AnyMatch = CheckGrid ();
@@ -502,4 +514,36 @@ public class CreateGame : MonoBehaviour {
 			o.SetActive(true);	
 		}
 	}
+
+	public void MineActive(GameObject PUTile)
+	{
+		Debug.Log ("mine");
+		int col = (int)PUTile.transform.position.x;
+		int row = (int)PUTile.transform.position.y;
+		for (int i = 0; i < cols; i++) {
+			if (tiles [i, row] != null) {
+				tiles [i, row].tile_Obj.SetActive (false);
+				for (int j = 0; j < tile_moves.Length; j++) {
+					if (tiles [i, row].type == tile_moves [j].gameObject.tag) {
+						Instantiate (tile_moves [j], tiles [i, row].tile_Obj.transform.position, tiles [i, row].tile_Obj.transform.rotation);
+					}
+				}
+			}
+			tiles [i, row] = null;
+		}
+		for (int i = 0; i < rows; i++) {
+			if (tiles [col, i] != null) {
+				tiles [col, i].tile_Obj.SetActive (false);
+				for (int j = 0; j < tile_moves.Length; j++) {
+					if (tiles [col, i].type == tile_moves [j].gameObject.tag) {
+						Instantiate (tile_moves [j], tiles [col, i].tile_Obj.transform.position, tiles [col, i].tile_Obj.transform.rotation);
+					}
+				}
+			}
+			tiles [col, i] = null;
+		}
+		GameManager.MinePowerUp = false;
+		renewBoard = true;
+	}
+
 }

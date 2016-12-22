@@ -12,6 +12,9 @@ public class GameManager : MonoBehaviour {
 	[SerializeField] int move;
 	[SerializeField] int Finish;
 
+	//power up
+	public static bool MinePowerUp=false;
+
 	public static bool GameOver=false;
 	public static int MoveLeft;
 	public static int tileforFinish;
@@ -25,6 +28,15 @@ public class GameManager : MonoBehaviour {
 		tileforFinish = Finish;
 		Camera.main.aspect = 10f / 16f;
 	
+	}
+
+	public  void MineSet()
+	{
+		if (MinePowerUp) {
+			MinePowerUp = false;
+		} else{
+			MinePowerUp = true;
+		}
 	}
 
 	public static void Move()
