@@ -21,6 +21,7 @@ public class CreateGame : MonoBehaviour {
 	[SerializeField] int cols;
 
 	[SerializeField] GameObject[] tile;
+	[SerializeField] GameObject[] tile_moves;
 	//0 - Blutile
 	//1- Purtile
 	//2- Siltile
@@ -304,7 +305,13 @@ public class CreateGame : MonoBehaviour {
 		for (int i = 0; i < counter; i++) {
 			if (tiles [col-i, row] != null) {
 				tiles [col-i, row].tile_Obj.SetActive (false);
+				for (int j = 0; j < tile_moves.Length; j++) {
+					if (tiles [col - i, row].type == tile_moves [j].gameObject.tag) {
+						Instantiate (tile_moves [j], tiles [col - i, row].tile_Obj.transform.position, tiles [col - i, row].tile_Obj.transform.rotation);
+					}
+				}
 			}
+
 			tiles [col - i, row] = null;
 		}
 
@@ -315,6 +322,11 @@ public class CreateGame : MonoBehaviour {
 		for (int i = 0; i < counter; i++) {
 			if (tiles [col, row-i] != null) {
 				tiles [col, row-i].tile_Obj.SetActive (false);
+				for (int j = 0; j < tile_moves.Length; j++) {
+					if (tiles [col, row-i].type == tile_moves [j].gameObject.tag) {
+						Instantiate (tile_moves [j], tiles [col, row-i].tile_Obj.transform.position, tiles [col, row-i].tile_Obj.transform.rotation);
+					}
+				}
 			}
 			tiles [col, row-i] = null;
 		}
