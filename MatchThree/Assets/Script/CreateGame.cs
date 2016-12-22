@@ -103,7 +103,7 @@ public class CreateGame : MonoBehaviour {
 		
 		CheckGrid ();
 		//selama ada yang gerak dia gk mau jalan
-		if (!anyMoved) {
+		if (!anyMoved && GameManager.MoveLeft>0) {
 			
 			if (Input.GetMouseButton (0)) {
 				Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
@@ -116,6 +116,7 @@ public class CreateGame : MonoBehaviour {
 
 		
 			} else if (Input.GetMouseButtonUp (0) && tileSelect.Count > 0) {
+				GameManager.Move();
 				FlipTile (tileSelect); // men-flip tile yang telah dipilih
 				tileSelect.Clear ();
 		

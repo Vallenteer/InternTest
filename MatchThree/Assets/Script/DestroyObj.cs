@@ -20,6 +20,7 @@ public class DestroyObj : MonoBehaviour {
 	{
 		//Debug.Log ("Hal");
 		Destroy (col.gameObject);
+		GameManager.TileLeft ();
 		if (particle.isStopped) {
 			particle.Play ();
 		}
