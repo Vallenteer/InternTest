@@ -98,6 +98,7 @@ public class CreateGame : MonoBehaviour {
 		//shuffle list biar random;
 		ShuffleList();
 		InitGrid ();	
+
 	}
 	
 	// Update is called once per frame
@@ -130,6 +131,10 @@ public class CreateGame : MonoBehaviour {
 				}
 
 		
+			}
+			if (GameManager.MoveLeft <= 0 || GameManager.tileforFinish <= 0) {
+				//GameOver
+				GameManager.GameOver=true;
 			}
 
 		}
@@ -440,10 +445,8 @@ public class CreateGame : MonoBehaviour {
 				o = tile_Bank.Find (x => (x.gameObject.tag == "Siltile") &&  (x.activeSelf==false));
 			}
 		}  
-
-		//FutureTile.tile_Obj.SetActive (false);
 		FutureTile= new Tiles(o,o.gameObject.tag); 
-		//o.SetActive(true);
+
 	}
 	void FlipBackTile(HashSet<GameObject> hash)
 	{
